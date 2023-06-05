@@ -4,3 +4,5 @@ It will be a project to better understand microservices, consolidate the configu
 
 Kubernetes will be used for project.  
 Apache Kafka will be used for queue operations.
+
+![](microservice.svg)
