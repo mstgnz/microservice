@@ -1,6 +1,11 @@
 {
   "name": "blog-web",
   "version": "0.0.0",
+  "author": {
+    "name": "Mesut GENEZ",
+    "email": "genezmesut@gmail.com",
+    "url": "https://github.com/mstgnz"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
