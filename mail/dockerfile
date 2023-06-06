@@ -1,0 +1,9 @@
+FROM golang:1.20-alpine as builder
+WORKDIR /app
+COPY . .
+RUN go mod download
+RUN GOOS=linux CGO_ENABLED=0 go build -o mailApp ./cmd
+
+FROM scratch
+COPY --from=builder /app/mailApp /app/mailApp
+ENTRYPOINT [ "/app/mailApp"]

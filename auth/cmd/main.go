@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	log.Printf("Logger Service")
+	log.Printf("Auth Service")
 }

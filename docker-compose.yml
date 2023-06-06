@@ -1,0 +1,169 @@
+version: '3'
+
+services:
+  postgres:
+    image: 'postgres:14'
+    container_name: ${PROJECT_NAME}-services
+    restart: always
+    #ports:
+    #  - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    environment:
+      - TZ=${POSTGRES_TZ}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASS}
+      - POSTGRES_DB=${POSTGRES_DB}
+    networks:
+      - microservices
+
+  mongo:
+    image: 'mongo:6.0.6'
+    container_name: ${PROJECT_NAME}-mongo
+    #ports:
+    #  - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
+    volumes:
+      - mongodb:/data/db
+    networks:
+      - microservices
+
+  redis:
+    image: 'redis:latest'
+    container_name: ${PROJECT_NAME}-redis
+    restart: always
+    #ports:
+    #  - "6379:6379"
+    networks:
+      - microservices
+
+  zookeeper:
+    image: 'bitnami/zookeeper:3.8.1'
+    container_name: ${PROJECT_NAME}-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - microservices
+
+  kafka:
+    image: 'bitnami/kafka:3.4.0'
+    container_name: ${PROJECT_NAME}-kafka
+    #ports:
+    #  - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://broker:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - microservices
+
+  listener:
+    build:
+      context: listener
+      dockerfile: dockerfile
+    container_name: ${PROJECT_NAME}-listener
+    restart: always
+    #ports:
+    #  - "8082:80"
+    depends_on:
+      - kafka
+    networks:
+      - microservices
+
+  logger:
+    build:
+      context: logger
+      dockerfile: dockerfile
+    container_name: ${PROJECT_NAME}-logger
+    restart: always
+    #ports:
+    #  - "8083:80"
+    depends_on:
+      - mongo
+    networks:
+      - microservices
+
+  mail:
+    build:
+      context: mail
+      dockerfile: dockerfile
+    container_name: ${PROJECT_NAME}-mail
+    restart: always
+    #ports:
+    #  - "8084:80"
+    depends_on:
+      - listener
+    networks:
+      - microservices
+
+  sms:
+    build:
+      context: sms
+      dockerfile: dockerfile
+    container_name: ${PROJECT_NAME}-sms
+    #ports:
+    #  - "8085:80"
+    restart: always
+    depends_on:
+      - listener
+    networks:
+      - microservices
+
+  auth:
+    build:
+      context: auth
+      dockerfile: dockerfile
+    container_name: ${PROJECT_NAME}-auth
+    restart: always
+    ports:
+      - "9092:80"
+    depends_on:
+      - postgres
+      - logger
+    networks:
+      - microservices
+
+  blog-api:
+    build:
+      context: blog-api
+      dockerfile: dockerfile
+    container_name: ${PROJECT_NAME}-blog-api
+    restart: always
+    ports:
+      - "9091:80"
+    depends_on:
+      - postgres
+      - redis
+      - listener
+    networks:
+      - microservices
+
+  blog-web:
+    build:
+      context: blog-web
+      dockerfile: dockerfile
+    container_name: ${PROJECT_NAME}-blog-web
+    restart: always
+    ports:
+      - "9090:80"
+    depends_on:
+      - auth
+      - blog-api
+      - redis
+    networks:
+      - microservices
+
+networks:
+  microservices:
+    driver: bridge
+
+volumes:
+  postgres:
+  mongodb:
