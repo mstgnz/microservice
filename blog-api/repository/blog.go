@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gosimple/slug"
-	"github.com/mstgnz/services/entity"
+	"github.com/mstgnz/microservice/entity"
 	"gorm.io/gorm"
 )
 

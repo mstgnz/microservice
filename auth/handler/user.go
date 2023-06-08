@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/mstgnz/services/config"
-	"github.com/mstgnz/services/service"
+	"github.com/mstgnz/microservice/config"
+	"github.com/mstgnz/microservice/service"
 )
 
 // IUserHandler interface

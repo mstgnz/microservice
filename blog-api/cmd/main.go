@@ -7,11 +7,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/mstgnz/services/config"
-	"github.com/mstgnz/services/handler"
-	customMiddleware "github.com/mstgnz/services/middleware"
-	"github.com/mstgnz/services/repository"
-	"github.com/mstgnz/services/service"
+	"github.com/mstgnz/microservice/config"
+	"github.com/mstgnz/microservice/handler"
+	customMiddleware "github.com/mstgnz/microservice/middleware"
+	"github.com/mstgnz/microservice/repository"
+	"github.com/mstgnz/microservice/service"
 )
 
 var (

@@ -2,9 +2,10 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 
-	"github.com/mstgnz/services/entity"
+	"github.com/mstgnz/microservice/entity"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -24,6 +25,7 @@ func OpenDatabase() *gorm.DB {
 	if err != nil {
 		panic("Failed to create a connection to database")
 	}
+	log.Printf("DB Connected")
 	_ = db.AutoMigrate(&entity.Blog{}, &entity.Comment{})
 	return db
 }

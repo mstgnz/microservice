@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"github.com/mashingan/smapping"
-	"github.com/mstgnz/services/dto"
-	"github.com/mstgnz/services/entity"
-	"github.com/mstgnz/services/repository"
+	"github.com/mstgnz/microservice/dto"
+	"github.com/mstgnz/microservice/entity"
+	"github.com/mstgnz/microservice/repository"
 )
 
 // ICommentService interface

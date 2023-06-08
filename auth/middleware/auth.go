@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/mstgnz/services/config"
+	"github.com/mstgnz/microservice/config"
 )
 
 func TokenValidate(next http.Handler) http.Handler {

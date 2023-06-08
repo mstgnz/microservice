@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/mstgnz/services/entity"
+	"github.com/mstgnz/microservice/entity"
 	"gorm.io/gorm"
 )
 
