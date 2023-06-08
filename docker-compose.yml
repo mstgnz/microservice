@@ -3,7 +3,7 @@ version: '3'
 services:
   postgres:
     image: 'postgres:14'
-    container_name: ${PROJECT_NAME}-services
+    container_name: ${PROJECT_NAME}-postgres
     restart: always
     #ports:
     #  - "5432:5432"
