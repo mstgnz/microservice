@@ -127,6 +127,13 @@ services:
     depends_on:
       - postgres
       - logger
+    environment:
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_PORT=${POSTGRES_PORT}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASS=${POSTGRES_PASS}
+      - DB_NAME=${POSTGRES_DB}
+      - DB_ZONE=${POSTGRES_TZ}
     networks:
       - microservices
 
@@ -142,6 +149,13 @@ services:
       - postgres
       - redis
       - listener
+    environment:
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_PORT=${POSTGRES_PORT}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASS=${POSTGRES_PASS}
+      - DB_NAME=${POSTGRES_DB}
+      - DB_ZONE=${POSTGRES_TZ}
     networks:
       - microservices
 
