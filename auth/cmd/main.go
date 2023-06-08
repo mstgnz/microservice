@@ -42,7 +42,7 @@ func main() {
 		r.Post("/login", authHandler.Login)
 		r.Post("/register", authHandler.Register)
 
-		r.Route("/user", func(r chi.Router) {
+		r.Route("/account", func(r chi.Router) {
 			r.Use(customMiddleware.TokenValidate)
 			r.Get("/profile", userHandler.Profile)
 			r.Post("/update", userHandler.Update)
