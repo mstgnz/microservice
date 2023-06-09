@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/mstgnz/microservice/config"
 	"github.com/mstgnz/microservice/dto"
@@ -33,10 +32,14 @@ func (c *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	authResult := c.authService.VerifyCredential(loginDTO.Email, loginDTO.Password)
-	if v, ok := authResult.(entity.User); ok {
-		generatedToken := config.GenerateToken(strconv.FormatUint(v.ID, 10))
-		v.Token = generatedToken
-		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Login successful", Data: generatedToken})
+	if user, ok := authResult.(entity.User); ok {
+		generatedToken, err := config.GenerateToken(user.ID)
+		if err != nil {
+			_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+			return
+		}
+		user.Token = generatedToken
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Login successful", Data: user})
 		return
 	}
 	_ = config.WriteJSON(w, http.StatusUnauthorized, config.Response{Status: false, Message: "Invalid credential"})
@@ -54,8 +57,16 @@ func (c *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 		_ = config.WriteJSON(w, http.StatusConflict, config.Response{Status: false, Message: "Email already exists"})
 		return
 	} else {
-		createdUser := c.authService.CreateUser(registerDTO)
-		token := config.GenerateToken(strconv.FormatUint(createdUser.ID, 10))
+		createdUser, err := c.authService.CreateUser(registerDTO)
+		if err != nil {
+			_ = config.WriteJSON(w, http.StatusCreated, config.Response{Status: false, Message: "Register error"})
+			return
+		}
+		token, err := config.GenerateToken(createdUser.ID)
+		if err != nil {
+			_ = config.WriteJSON(w, http.StatusCreated, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+			return
+		}
 		_ = config.WriteJSON(w, http.StatusCreated, config.Response{Status: true, Message: "Register successful", Data: token})
 		return
 	}

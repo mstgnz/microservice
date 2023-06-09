@@ -15,7 +15,7 @@ type IUserRepository interface {
 	VerifyCredential(email string, password string) interface{}
 	IsDuplicateEmail(email string) (tx *gorm.DB)
 	FindByEmail(email string) entity.User
-	ProfileUser(userID string) entity.User
+	ProfileUser(userID uint) entity.User
 }
 
 type userRepository struct {
@@ -68,7 +68,7 @@ func (db *userRepository) FindByEmail(email string) entity.User {
 	return user
 }
 
-func (db *userRepository) ProfileUser(userID string) entity.User {
+func (db *userRepository) ProfileUser(userID uint) entity.User {
 	var user entity.User
 	db.conn.Preload("Blogs").Preload("Blogs.User").Find(&user, userID)
 	return user

@@ -1,9 +1,12 @@
 package handler
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/mstgnz/microservice/config"
+	"github.com/mstgnz/microservice/dto"
 	"github.com/mstgnz/microservice/service"
 )
 
@@ -27,44 +30,22 @@ func UserHandler(userService service.IUserService) IUserHandler {
 
 // Update user
 func (c *userHandler) Update(w http.ResponseWriter, r *http.Request) {
-	_ = config.WriteJSON(w, 200, config.Response{Status: true, Message: "Update"})
-
-	/*var userUpdateDTO dto.UserUpdateDTO
-	errDTO := context.ShouldBind(&userUpdateDTO)
-	if errDTO != nil {
-		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
-		context.AbortWithStatusJSON(http.StatusBadRequest, res)
+	var userUpdateDTO dto.UserUpdateDTO
+	err := config.ReadJSON(w, r, &userUpdateDTO)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request"})
 		return
 	}
-	authHeader := context.GetHeader("Authorization")
-	token, errToken := c.jwtService.ValidateToken(authHeader)
-	if errToken != nil {
-		panic(errToken.Error())
-	}
-	claims := token.Claims.(jwt.MapClaims)
-	id, err := strconv.ParseUint(fmt.Sprintf("%v", claims["user_id"]), 10, 64)
-	if err != nil {
-		panic(err.Error())
-	}
-	userUpdateDTO.ID = id
-	u := c.userService.Update(userUpdateDTO)
-	res := helper.BuildResponse(true, "OK!", u)
-	context.JSON(http.StatusOK, res)*/
+	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
+	userUpdateDTO.ID = userID
+	user, _ := c.userService.Update(userUpdateDTO)
+	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Update successful", Data: user})
 }
 
 // Profile user
 func (c *userHandler) Profile(w http.ResponseWriter, r *http.Request) {
-	_ = config.WriteJSON(w, 200, config.Response{Status: true, Message: "Profile"})
-
-	/*authHeader := context.GetHeader("Authorization")
-	token, err := c.jwtService.ValidateToken(authHeader)
-	if err != nil {
-		panic(err.Error())
-	}
-	claims := token.Claims.(jwt.MapClaims)
-	id := fmt.Sprintf("%v", claims["user_id"])
-	user := c.userService.Profile(id)
-	res := helper.BuildResponse(true, "OK", user)
-	context.JSON(http.StatusOK, res)*/
-
+	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
+	log.Printf("USER ID %v", userID)
+	user := c.userService.Profile(userID)
+	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: fmt.Sprintf("Profile: %d", userID), Data: user})
 }

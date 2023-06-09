@@ -2,23 +2,29 @@ package dto
 
 // RegisterDTO Register Data Transfer Objects
 type RegisterDTO struct {
-	FirstName string `json:"firstname" form:"firstname" binding:"required"`
-	LastName  string `json:"lastname" form:"lastname" binding:"required"`
-	Email     string `json:"email" form:"email" binding:"required,email" `
-	Password  string `json:"password" form:"password" binding:"required"`
+	FirstName string `json:"firstname"`
+	LastName  string `json:"lastname"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 }
 
 // UserUpdateDTO User Data Transfer Objects
 type UserUpdateDTO struct {
-	ID        uint64 `json:"id" form:"id"`
-	FirstName string `json:"firstname" form:"firstname" binding:"required"`
-	LastName  string `json:"lastname" form:"lastname" binding:"required"`
-	Email     string `json:"email" form:"email" binding:"required,email"`
-	Password  string `json:"password,omitempty" form:"password,omitempty"`
+	ID        uint   `json:"id"`
+	FirstName string `json:"firstname"`
+	LastName  string `json:"lastname"`
+	Email     string `json:"email"`
+}
+
+// PassUpdateDTO Password Data Transfer Objects
+type PassUpdateDTO struct {
+	ID         uint   `json:"id"`
+	Password   string `json:"password"`
+	RePassword string `json:"re-password"`
 }
 
 // LoginDTO Login Data Transfer Objects
 type LoginDTO struct {
-	Email    string `json:"email" form:"email" binding:"required,email"`
-	Password string `json:"password" form:"password" binding:"required"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
