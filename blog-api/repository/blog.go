@@ -15,7 +15,7 @@ type IBlogRepository interface {
 	UpdateBlog(b entity.Blog) entity.Blog
 	DeleteBlog(b entity.Blog)
 	AllBlog() []entity.Blog
-	FindBlogByID(blogID uint64) entity.Blog
+	FindBlogByID(blogID uint) entity.Blog
 	GenerateSlug(slug string) string
 }
 
@@ -56,7 +56,7 @@ func (db *blogRepository) DeleteBlog(b entity.Blog) {
 }
 
 // FindBlogByID find id blog
-func (db *blogRepository) FindBlogByID(blogID uint64) entity.Blog {
+func (db *blogRepository) FindBlogByID(blogID uint) entity.Blog {
 	var blog entity.Blog
 	db.connection.Find(&blog, blogID)
 	return blog

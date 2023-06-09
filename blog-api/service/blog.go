@@ -16,8 +16,8 @@ type IBlogService interface {
 	Update(b dto.BlogUpdateDTO) entity.Blog
 	Delete(b entity.Blog)
 	All() []dto.BlogListDTO
-	FindByID(blogID uint64) entity.Blog
-	IsAllowedToEdit(userID string, blogID uint64) bool
+	FindByID(blogID uint) entity.Blog
+	IsAllowedToEdit(userID string, blogID uint) bool
 }
 
 // blogService struct
@@ -78,12 +78,12 @@ func (service *blogService) All() []dto.BlogListDTO {
 }
 
 // FindByID blog service
-func (service *blogService) FindByID(blogID uint64) entity.Blog {
+func (service *blogService) FindByID(blogID uint) entity.Blog {
 	return service.blogRepository.FindBlogByID(blogID)
 }
 
 // IsAllowedToEdit blog service
-func (service *blogService) IsAllowedToEdit(userID string, blogID uint64) bool {
+func (service *blogService) IsAllowedToEdit(userID string, blogID uint) bool {
 	b := service.blogRepository.FindBlogByID(blogID)
 	id := fmt.Sprintf("%v", b.UserID)
 	return userID == id

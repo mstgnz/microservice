@@ -10,7 +10,7 @@ type ICommentRepository interface {
 	InsertComment(b entity.Comment) (entity.Comment, error)
 	UpdateComment(b entity.Comment) entity.Comment
 	DeleteComment(b entity.Comment)
-	FindCommentByID(commentID uint64) entity.Comment
+	FindCommentByID(commentID uint) entity.Comment
 }
 
 // commentRepository struct
@@ -46,7 +46,7 @@ func (db *commentRepository) DeleteComment(b entity.Comment) {
 }
 
 // FindCommentByID find id blog
-func (db *commentRepository) FindCommentByID(commentID uint64) entity.Comment {
+func (db *commentRepository) FindCommentByID(commentID uint) entity.Comment {
 	var comment entity.Comment
 	db.connection.Find(&comment, commentID)
 	return comment

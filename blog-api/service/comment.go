@@ -15,7 +15,7 @@ type ICommentService interface {
 	Insert(b dto.CommentCreateDTO) (entity.Comment, error)
 	Update(b dto.CommentUpdateDTO) entity.Comment
 	Delete(b entity.Comment)
-	IsAllowedToEdit(userID string, commentID uint64) bool
+	IsAllowedToEdit(userID string, commentID uint) bool
 }
 
 // commentService struct
@@ -57,7 +57,7 @@ func (service *commentService) Delete(b entity.Comment) {
 }
 
 // IsAllowedToEdit blog service
-func (service *commentService) IsAllowedToEdit(userID string, commentID uint64) bool {
+func (service *commentService) IsAllowedToEdit(userID string, commentID uint) bool {
 	b := service.commentRepository.FindCommentByID(commentID)
 	id := fmt.Sprintf("%v", b.UserID)
 	return userID == id
