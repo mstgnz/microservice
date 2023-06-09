@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 	"strconv"
 
@@ -28,9 +27,9 @@ func AuthHandler(authService service.IAuthService) IAuthHandler {
 
 func (c *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var loginDTO dto.LoginDTO
-	errDTO := config.ReadJSON(w, r, &loginDTO)
-	if errDTO != nil {
-		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: errDTO.Error()})
+	err := config.ReadJSON(w, r, &loginDTO)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 		return
 	}
 	authResult := c.authService.VerifyCredential(loginDTO.Email, loginDTO.Password)
@@ -40,21 +39,19 @@ func (c *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Login successful", Data: generatedToken})
 		return
 	}
-	_ = config.WriteJSON(w, http.StatusUnauthorized, config.Response{Status: false, Message: "Invalid credential", Error: errDTO.Error()})
-	_ = config.WriteJSON(w, http.StatusUnauthorized, config.Response{Status: false, Message: "dont see me", Error: errDTO.Error()})
-
-	log.Printf("bunu yazmaması lazım ama hadi bakalım")
+	_ = config.WriteJSON(w, http.StatusUnauthorized, config.Response{Status: false, Message: "Invalid credential"})
+	return
 }
 
 func (c *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var registerDTO dto.RegisterDTO
-	errDTO := config.ReadJSON(w, r, &registerDTO)
-	if errDTO != nil {
-		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: errDTO.Error()})
+	err := config.ReadJSON(w, r, &registerDTO)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 		return
 	}
 	if !c.authService.IsDuplicateEmail(registerDTO.Email) {
-		_ = config.WriteJSON(w, http.StatusConflict, config.Response{Status: false, Message: "Email already exists", Error: errDTO.Error()})
+		_ = config.WriteJSON(w, http.StatusConflict, config.Response{Status: false, Message: "Email already exists"})
 		return
 	} else {
 		createdUser := c.authService.CreateUser(registerDTO)
