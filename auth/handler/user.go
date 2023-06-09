@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/mstgnz/microservice/config"
@@ -14,6 +12,7 @@ import (
 type IUserHandler interface {
 	Update(w http.ResponseWriter, r *http.Request)
 	Profile(w http.ResponseWriter, r *http.Request)
+	UpdatePassword(w http.ResponseWriter, r *http.Request)
 }
 
 // userHandler struct
@@ -45,7 +44,27 @@ func (c *userHandler) Update(w http.ResponseWriter, r *http.Request) {
 // Profile user
 func (c *userHandler) Profile(w http.ResponseWriter, r *http.Request) {
 	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
-	log.Printf("USER ID %v", userID)
-	user := c.userService.Profile(userID)
-	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: fmt.Sprintf("Profile: %d", userID), Data: user})
+	user, err := c.userService.Profile(userID)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Profile failed", Error: err})
+		return
+	}
+	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Profile successful", Data: user})
+}
+
+func (c *userHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	var passUpdateDTO dto.PassUpdateDTO
+	err := config.ReadJSON(w, r, &passUpdateDTO)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err})
+		return
+	}
+	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
+	passUpdateDTO.ID = userID
+	err = c.userService.UpdatePassword(passUpdateDTO)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Update failed", Error: err})
+		return
+	}
+	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Update successful"})
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/mstgnz/microservice/config"
 	"github.com/mstgnz/microservice/dto"
-	"github.com/mstgnz/microservice/entity"
 	"github.com/mstgnz/microservice/service"
 )
 
@@ -31,19 +30,18 @@ func (c *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 		return
 	}
-	authResult := c.authService.VerifyCredential(loginDTO.Email, loginDTO.Password)
-	if user, ok := authResult.(entity.User); ok {
-		generatedToken, err := config.GenerateToken(user.ID)
-		if err != nil {
-			_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
-			return
-		}
-		user.Token = generatedToken
-		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Login successful", Data: user})
+	user, err := c.authService.VerifyCredential(loginDTO.Email, loginDTO.Password)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 		return
 	}
-	_ = config.WriteJSON(w, http.StatusUnauthorized, config.Response{Status: false, Message: "Invalid credential"})
-	return
+	generatedToken, err := config.GenerateToken(user.ID)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
+	}
+	user.Token = generatedToken
+	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Login successful", Data: user})
 }
 
 func (c *authHandler) Register(w http.ResponseWriter, r *http.Request) {

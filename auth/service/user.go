@@ -10,7 +10,8 @@ import (
 // IUserService interface
 type IUserService interface {
 	Update(user dto.UserUpdateDTO) (entity.User, error)
-	Profile(userID uint) entity.User
+	Profile(userID uint) (entity.User, error)
+	UpdatePassword(pass dto.PassUpdateDTO) error
 }
 
 // userService struct
@@ -36,7 +37,10 @@ func (service *userService) Update(user dto.UserUpdateDTO) (entity.User, error) 
 	return updatedUser, nil
 }
 
-// Profile user
-func (service *userService) Profile(userID uint) entity.User {
+func (service *userService) Profile(userID uint) (entity.User, error) {
 	return service.userRepository.ProfileUser(userID)
+}
+
+func (service *userService) UpdatePassword(pass dto.PassUpdateDTO) error {
+	return service.userRepository.UpdatePassword(pass)
 }

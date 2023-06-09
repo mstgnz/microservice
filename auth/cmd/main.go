@@ -46,8 +46,9 @@ func main() {
 
 		r.Route("/account", func(r chi.Router) {
 			r.Use(customMiddleware.TokenValidate)
-			r.Get("/profile", userHandler.Profile)
+			r.Get("/", userHandler.Profile)
 			r.Post("/update", userHandler.Update)
+			r.Post("/update-password", userHandler.UpdatePassword)
 		})
 	})
 
