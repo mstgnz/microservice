@@ -36,14 +36,13 @@ func (service *authService) VerifyCredential(email string, password string) (ent
 	return user, err
 }
 
-func (service *authService) CreateUser(user dto.RegisterDTO) (entity.User, error) {
-	userToCreate := entity.User{}
-	err := smapping.FillStruct(&userToCreate, smapping.MapFields(&user))
+func (service *authService) CreateUser(userDto dto.RegisterDTO) (entity.User, error) {
+	user := entity.User{}
+	err := smapping.FillStruct(&user, smapping.MapFields(&userDto))
 	if err != nil {
-		return userToCreate, err
+		return user, err
 	}
-	res := service.userRepository.InsertUser(userToCreate)
-	return res, nil
+	return service.userRepository.InsertUser(user)
 }
 
 func (service *authService) FindByEmail(email string) bool {

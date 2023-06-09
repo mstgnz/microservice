@@ -27,14 +27,13 @@ func UserService(userRepo repository.IUserRepository) IUserService {
 }
 
 // Update user
-func (service *userService) Update(user dto.UserUpdateDTO) (entity.User, error) {
-	userToUpdate := entity.User{}
-	err := smapping.FillStruct(&userToUpdate, smapping.MapFields(&user))
+func (service *userService) Update(userDto dto.UserUpdateDTO) (entity.User, error) {
+	user := entity.User{}
+	err := smapping.FillStruct(&user, smapping.MapFields(&userDto))
 	if err != nil {
-		return userToUpdate, err
+		return user, err
 	}
-	updatedUser := service.userRepository.UpdateUser(userToUpdate)
-	return updatedUser, nil
+	return service.userRepository.UpdateUser(user)
 }
 
 func (service *userService) Profile(userID uint) (entity.User, error) {

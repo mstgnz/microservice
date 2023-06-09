@@ -7,10 +7,9 @@ import (
 	"gorm.io/gorm"
 )
 
-// IUserRepository is contract what userRepository can do to db
 type IUserRepository interface {
-	InsertUser(user entity.User) entity.User
-	UpdateUser(user entity.User) entity.User
+	InsertUser(user entity.User) (entity.User, error)
+	UpdateUser(user entity.User) (entity.User, error)
 	VerifyCredential(email string, password string) (entity.User, error)
 	IsDuplicateEmail(email string) (entity.User, error)
 	FindByEmail(email string) (entity.User, error)
@@ -22,30 +21,21 @@ type userRepository struct {
 	conn *gorm.DB
 }
 
-// UserRepository is creates a new instance of IUserRepository
 func UserRepository(db *gorm.DB) IUserRepository {
 	return &userRepository{
 		conn: db,
 	}
 }
 
-func (db *userRepository) InsertUser(user entity.User) entity.User {
+func (db *userRepository) InsertUser(user entity.User) (entity.User, error) {
 	user.Password = config.HashAndSalt([]byte(user.Password))
-	db.conn.Save(&user)
-	return user
+	tx := db.conn.Save(&user)
+	return user, tx.Error
 }
 
-func (db *userRepository) UpdateUser(user entity.User) entity.User {
-	if user.Password != "" {
-		user.Password = config.HashAndSalt([]byte(user.Password))
-	} else {
-		var tempUser entity.User
-		db.conn.Find(&tempUser, user.ID)
-		user.Password = tempUser.Password
-	}
-
-	db.conn.Save(&user)
-	return user
+func (db *userRepository) UpdateUser(user entity.User) (entity.User, error) {
+	tx := db.conn.Model(&user).Updates(entity.User{FirstName: user.FirstName, LastName: user.LastName})
+	return user, tx.Error
 }
 
 func (db *userRepository) VerifyCredential(email string, password string) (entity.User, error) {

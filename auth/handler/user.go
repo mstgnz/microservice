@@ -32,12 +32,16 @@ func (c *userHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var userUpdateDTO dto.UserUpdateDTO
 	err := config.ReadJSON(w, r, &userUpdateDTO)
 	if err != nil {
-		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request"})
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err})
 		return
 	}
 	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
 	userUpdateDTO.ID = userID
-	user, _ := c.userService.Update(userUpdateDTO)
+	user, err := c.userService.Update(userUpdateDTO)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Update failed", Error: err})
+		return
+	}
 	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Update successful", Data: user})
 }
 
