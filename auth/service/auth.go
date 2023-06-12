@@ -12,7 +12,6 @@ type IAuthService interface {
 	VerifyCredential(email string, password string) (entity.User, error)
 	CreateUser(user dto.RegisterDTO) (entity.User, error)
 	FindByEmail(email string) bool
-	IsDuplicateEmail(email string) bool
 }
 
 type authService struct {
@@ -26,10 +25,10 @@ func AuthService(userRep repository.IUserRepository) IAuthService {
 }
 
 func (service *authService) VerifyCredential(email string, password string) (entity.User, error) {
-	user, err := service.userRepository.VerifyCredential(email, password)
-	if err == nil && user.Password != "" {
+	user, err := service.userRepository.FindByEmail(email)
+	if err == nil {
 		comparedPassword := config.ComparePassword(user.Password, []byte(password))
-		if user.Email == email && comparedPassword {
+		if comparedPassword {
 			return user, nil
 		}
 	}
@@ -42,6 +41,7 @@ func (service *authService) CreateUser(userDto dto.RegisterDTO) (entity.User, er
 	if err != nil {
 		return user, err
 	}
+	user.Password = config.HashAndSalt([]byte(user.Password))
 	return service.userRepository.InsertUser(user)
 }
 
@@ -51,9 +51,4 @@ func (service *authService) FindByEmail(email string) bool {
 		return false
 	}
 	return true
-}
-
-func (service *authService) IsDuplicateEmail(email string) bool {
-	user, err := service.userRepository.IsDuplicateEmail(email)
-	return err != nil || user.Email == ""
 }

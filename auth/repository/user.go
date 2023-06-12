@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"github.com/mstgnz/microservice/config"
 	"github.com/mstgnz/microservice/dto"
 	"github.com/mstgnz/microservice/entity"
 	"gorm.io/gorm"
@@ -10,8 +9,6 @@ import (
 type IUserRepository interface {
 	InsertUser(user entity.User) (entity.User, error)
 	UpdateUser(user entity.User) (entity.User, error)
-	VerifyCredential(email string, password string) (entity.User, error)
-	IsDuplicateEmail(email string) (entity.User, error)
 	FindByEmail(email string) (entity.User, error)
 	ProfileUser(userID uint) (entity.User, error)
 	UpdatePassword(pass dto.PassUpdateDTO) error
@@ -28,7 +25,6 @@ func UserRepository(db *gorm.DB) IUserRepository {
 }
 
 func (db *userRepository) InsertUser(user entity.User) (entity.User, error) {
-	user.Password = config.HashAndSalt([]byte(user.Password))
 	tx := db.conn.Save(&user)
 	return user, tx.Error
 }
@@ -38,27 +34,15 @@ func (db *userRepository) UpdateUser(user entity.User) (entity.User, error) {
 	return user, tx.Error
 }
 
-func (db *userRepository) VerifyCredential(email string, password string) (entity.User, error) {
-	var user entity.User
-	tx := db.conn.Where("email = ?", email, "password = ?", password).Take(&user)
-	return user, tx.Error
-}
-
-func (db *userRepository) IsDuplicateEmail(email string) (entity.User, error) {
-	var user entity.User
-	tx := db.conn.Where("email = ?", email).Take(&user)
-	return user, tx.Error
-}
-
 func (db *userRepository) FindByEmail(email string) (entity.User, error) {
 	var user entity.User
-	tx := db.conn.Where("email = ?", email).Take(&user)
+	tx := db.conn.Take(&user, "email = ?", email)
 	return user, tx.Error
 }
 
 func (db *userRepository) ProfileUser(userID uint) (entity.User, error) {
 	var user entity.User
-	tx := db.conn.Find(&user, userID)
+	tx := db.conn.Take(&user, userID)
 	return user, tx.Error
 
 }

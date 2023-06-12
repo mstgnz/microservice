@@ -25,7 +25,14 @@ func AuthHandler(authService service.IAuthService) IAuthHandler {
 
 func (c *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var loginDTO dto.LoginDTO
+	// body to struct
 	err := config.ReadJSON(w, r, &loginDTO)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
+	}
+	// struct to validate
+	err = config.Validate(loginDTO)
 	if err != nil {
 		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 		return
@@ -46,26 +53,34 @@ func (c *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 func (c *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var registerDTO dto.RegisterDTO
+	// body to struct
 	err := config.ReadJSON(w, r, &registerDTO)
 	if err != nil {
 		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 		return
 	}
-	if !c.authService.IsDuplicateEmail(registerDTO.Email) {
+	// struct to validate
+	err = config.Validate(registerDTO)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
+	}
+	if !c.authService.FindByEmail(registerDTO.Email) {
 		_ = config.WriteJSON(w, http.StatusConflict, config.Response{Status: false, Message: "Email already exists"})
 		return
 	} else {
-		createdUser, err := c.authService.CreateUser(registerDTO)
+		user, err := c.authService.CreateUser(registerDTO)
 		if err != nil {
 			_ = config.WriteJSON(w, http.StatusCreated, config.Response{Status: false, Message: "Register error"})
 			return
 		}
-		token, err := config.GenerateToken(createdUser.ID)
+		token, err := config.GenerateToken(user.ID)
 		if err != nil {
 			_ = config.WriteJSON(w, http.StatusCreated, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 			return
 		}
-		_ = config.WriteJSON(w, http.StatusCreated, config.Response{Status: true, Message: "Register successful", Data: token})
+		user.Token = token
+		_ = config.WriteJSON(w, http.StatusCreated, config.Response{Status: true, Message: "Register successful", Data: user})
 		return
 	}
 }

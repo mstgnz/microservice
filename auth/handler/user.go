@@ -30,9 +30,16 @@ func UserHandler(userService service.IUserService) IUserHandler {
 // Update user
 func (c *userHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var userUpdateDTO dto.UserUpdateDTO
+	// body to struct
 	err := config.ReadJSON(w, r, &userUpdateDTO)
 	if err != nil {
 		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err})
+		return
+	}
+	// struct to validate
+	err = config.Validate(userUpdateDTO)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 		return
 	}
 	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
@@ -58,16 +65,23 @@ func (c *userHandler) Profile(w http.ResponseWriter, r *http.Request) {
 
 func (c *userHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
 	var passUpdateDTO dto.PassUpdateDTO
+	// body to struct
 	err := config.ReadJSON(w, r, &passUpdateDTO)
 	if err != nil {
-		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err})
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
+	}
+	// struct to validate
+	err = config.Validate(passUpdateDTO)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 		return
 	}
 	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
 	passUpdateDTO.ID = userID
 	err = c.userService.UpdatePassword(passUpdateDTO)
 	if err != nil {
-		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Update failed", Error: err})
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Update failed", Error: err.Error()})
 		return
 	}
 	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Update successful"})
