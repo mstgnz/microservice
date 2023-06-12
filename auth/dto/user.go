@@ -13,7 +13,6 @@ type UserUpdateDTO struct {
 	ID        uint   `json:"id"`
 	FirstName string `json:"firstname" validate:"required,min=2"`
 	LastName  string `json:"lastname" validate:"required,min=2"`
-	Email     string `json:"email" validate:"required,email"`
 }
 
 // PassUpdateDTO Password Data Transfer Objects
