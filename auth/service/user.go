@@ -1,7 +1,10 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/mashingan/smapping"
+	"github.com/mstgnz/microservice/config"
 	"github.com/mstgnz/microservice/dto"
 	"github.com/mstgnz/microservice/entity"
 	"github.com/mstgnz/microservice/repository"
@@ -41,5 +44,9 @@ func (service *userService) Profile(userID uint) (entity.User, error) {
 }
 
 func (service *userService) UpdatePassword(pass dto.PassUpdateDTO) error {
+	if pass.Password != pass.RePassword {
+		return errors.New("password mismatch")
+	}
+	pass.Password = config.HashAndSalt(pass.Password)
 	return service.userRepository.UpdatePassword(pass)
 }

@@ -71,7 +71,7 @@ func (c *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 	} else {
 		user, err := c.authService.CreateUser(registerDTO)
 		if err != nil {
-			_ = config.WriteJSON(w, http.StatusCreated, config.Response{Status: false, Message: "Register error"})
+			_ = config.WriteJSON(w, http.StatusCreated, config.Response{Status: false, Message: "Register error", Error: err.Error()})
 			return
 		}
 		token, err := config.GenerateToken(user.ID)

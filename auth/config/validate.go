@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -9,7 +10,8 @@ import (
 func Validate(structure interface{}) error {
 	var validate *validator.Validate
 	validate = validator.New()
-	var errorStr string
+	var errStr string
+	var errSlc []error
 	// returns nil or ValidationErrors ( []FieldError )
 	err := validate.Struct(structure)
 	if err != nil {
@@ -17,15 +19,15 @@ func Validate(structure interface{}) error {
 		// an invalid value for validation such as interface with nil
 		// value most including myself do not usually have code like this.
 		if _, ok := err.(*validator.InvalidValidationError); ok {
-			errorStr = err.Error()
+			errStr = err.Error()
 		}
 		for _, err := range err.(validator.ValidationErrors) {
-			errorStr = errorStr + " " + err.Tag()
-			errorStr = errorStr + " " + err.Field()
-			errorStr = errorStr + " " + err.Type().String()
+			errStr = fmt.Sprintf("%s %s %s %s", err.Tag(), err.Param(), err.Field(), err.Type().String())
+			errSlc = append(errSlc, errors.New(errStr))
+			errStr = ""
 		}
 		// from here you can create your own error messages in whatever language you wish
-		return errors.New(errorStr)
+		return errors.Join(errSlc...)
 	}
 	return nil
 }

@@ -33,7 +33,7 @@ func (c *userHandler) Update(w http.ResponseWriter, r *http.Request) {
 	// body to struct
 	err := config.ReadJSON(w, r, &userUpdateDTO)
 	if err != nil {
-		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err})
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 		return
 	}
 	// struct to validate
@@ -46,7 +46,7 @@ func (c *userHandler) Update(w http.ResponseWriter, r *http.Request) {
 	userUpdateDTO.ID = userID
 	user, err := c.userService.Update(userUpdateDTO)
 	if err != nil {
-		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Update failed", Error: err})
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Update failed", Error: err.Error()})
 		return
 	}
 	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Update successful", Data: user})
@@ -57,7 +57,7 @@ func (c *userHandler) Profile(w http.ResponseWriter, r *http.Request) {
 	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
 	user, err := c.userService.Profile(userID)
 	if err != nil {
-		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Profile failed", Error: err})
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Profile failed", Error: err.Error()})
 		return
 	}
 	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Profile successful", Data: user})

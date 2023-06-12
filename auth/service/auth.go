@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/mashingan/smapping"
 	"github.com/mstgnz/microservice/config"
 	"github.com/mstgnz/microservice/dto"
@@ -27,9 +29,9 @@ func AuthService(userRep repository.IUserRepository) IAuthService {
 func (service *authService) VerifyCredential(email string, password string) (entity.User, error) {
 	user, err := service.userRepository.FindByEmail(email)
 	if err == nil {
-		comparedPassword := config.ComparePassword(user.Password, []byte(password))
-		if comparedPassword {
-			return user, nil
+		comparedPassword := config.ComparePassword(user.Password, password)
+		if !comparedPassword {
+			return user, errors.New("information could not be verified")
 		}
 	}
 	return user, err
@@ -41,7 +43,7 @@ func (service *authService) CreateUser(userDto dto.RegisterDTO) (entity.User, er
 	if err != nil {
 		return user, err
 	}
-	user.Password = config.HashAndSalt([]byte(user.Password))
+	user.Password = config.HashAndSalt(user.Password)
 	return service.userRepository.InsertUser(user)
 }
 
