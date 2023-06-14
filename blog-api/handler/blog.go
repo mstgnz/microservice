@@ -2,16 +2,19 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/mstgnz/microservice/config"
+	"github.com/mstgnz/microservice/dto"
 	"github.com/mstgnz/microservice/service"
 )
 
 // IBlogHandler interface
 type IBlogHandler interface {
 	All(w http.ResponseWriter, r *http.Request)
-	FindByID(w http.ResponseWriter, r *http.Request)
-	Insert(w http.ResponseWriter, r *http.Request)
+	Find(w http.ResponseWriter, r *http.Request)
+	Create(w http.ResponseWriter, r *http.Request)
 	Update(w http.ResponseWriter, r *http.Request)
 	Delete(w http.ResponseWriter, r *http.Request)
 }
@@ -28,119 +31,93 @@ func BlogHandler(blogService service.IBlogService) IBlogHandler {
 	}
 }
 
-// All get all blogs
-func (c *blogHandler) All(w http.ResponseWriter, r *http.Request) {
-	_ = config.WriteJSON(w, 200, config.Response{Status: true, Message: "All"})
-	/*var blogs = c.blogService.All()
-	res := helper.BuildResponse(true, "OK", blogs)
-	context.JSON(http.StatusOK, res)*/
-}
-
-// FindByID get by id for blog
-func (c *blogHandler) FindByID(w http.ResponseWriter, r *http.Request) {
-	_ = config.WriteJSON(w, 200, config.Response{Status: true, Message: "FindBy"})
-
-	/*id, err := strconv.ParseUint(context.Param("id"), 0, 0)
+func (c *blogHandler) All(w http.ResponseWriter, _ *http.Request) {
+	blogs, err := c.blogService.All()
 	if err != nil {
-		res := helper.BuildErrorResponse("No param id was found", err.Error(), helper.EmptyObj{})
-		context.AbortWithStatusJSON(http.StatusBadRequest, res)
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 		return
 	}
-
-	var blog = c.blogService.FindByID(id)
-	if (blog == entity.Blog{}) {
-		res := helper.BuildErrorResponse("Data not found", "No data with given id", helper.EmptyObj{})
-		context.JSON(http.StatusNotFound, res)
-	} else {
-		res := helper.BuildResponse(true, "OK", blog)
-		context.JSON(http.StatusOK, res)
-	}*/
+	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "All", Data: blogs})
 }
 
-// Insert create blog
-func (c *blogHandler) Insert(w http.ResponseWriter, r *http.Request) {
-	_ = config.WriteJSON(w, 200, config.Response{Status: true, Message: "Insert"})
+func (c *blogHandler) Find(w http.ResponseWriter, r *http.Request) {
+	slug := chi.URLParam(r, "slug")
+	blog, err := c.blogService.Find(slug)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
+	}
+	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Blog successful", Data: blog})
 
-	/*var blogCreateDTO dto.BlogCreateDTO
-	errDTO := context.ShouldBind(&blogCreateDTO)
-	if errDTO != nil {
-		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
-		context.JSON(http.StatusBadRequest, res)
-	} else {
-		authHeader := context.GetHeader("Authorization")
-		userID := c.getUserIDByToken(authHeader)
-		convertedUserID, err := strconv.ParseUint(userID, 10, 64)
-		if err == nil {
-			blogCreateDTO.UserID = convertedUserID
-		}
-		result, err := c.blogService.Insert(blogCreateDTO)
-		if err != nil {
-			response := helper.BuildErrorResponse("ERROR", err.Error(), err.Error())
-			context.JSON(http.StatusBadRequest, response)
-		} else {
-			response := helper.BuildResponse(true, "OK", result)
-			context.JSON(http.StatusCreated, response)
-		}
-	}*/
+}
+
+func (c *blogHandler) Create(w http.ResponseWriter, r *http.Request) {
+	var blogCreate dto.BlogCreate
+	// body to struct
+	err := config.ReadJSON(w, r, &blogCreate)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
+	}
+	// struct to validate
+	err = config.Validate(blogCreate)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
+	}
+	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
+	blogCreate.UserID = userID
+
+	blogs, err := c.blogService.Create(blogCreate)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
+	}
+	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Blog create successful", Data: blogs})
 }
 
 // Update blog
 func (c *blogHandler) Update(w http.ResponseWriter, r *http.Request) {
-	_ = config.WriteJSON(w, 200, config.Response{Status: true, Message: "Update"})
-
-	/*var blogUpdateDTO dto.BlogUpdateDTO
-	errDTO := context.ShouldBind(&blogUpdateDTO)
-	if errDTO != nil {
-		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
-		context.JSON(http.StatusBadRequest, res)
+	var blogUpdate dto.BlogUpdate
+	// body to struct
+	err := config.ReadJSON(w, r, &blogUpdate)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 		return
 	}
-
-	authHeader := context.GetHeader("Authorization")
-	token, errToken := c.jwtService.ValidateToken(authHeader)
-	if errToken != nil {
-		panic(errToken.Error())
+	// struct to validate
+	err = config.Validate(blogUpdate)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
 	}
-	claims := token.Claims.(jwt.MapClaims)
-	userID := fmt.Sprintf("%v", claims["user_id"])
-	if c.blogService.IsAllowedToEdit(userID, blogUpdateDTO.ID) {
-		id, errID := strconv.ParseUint(userID, 10, 64)
-		if errID == nil {
-			blogUpdateDTO.UserID = id
-		}
-		result := c.blogService.Update(blogUpdateDTO)
-		response := helper.BuildResponse(true, "OK", result)
-		context.JSON(http.StatusOK, response)
-	} else {
-		response := helper.BuildErrorResponse("You dont have permission", "You are not the owner", helper.EmptyObj{})
-		context.JSON(http.StatusForbidden, response)
-	}*/
+	id := chi.URLParam(r, "id")
+	i, _ := strconv.Atoi(id)
+	blogUpdate.ID = uint(i)
+	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
+	blogUpdate.UserID = userID
+
+	blog, err := c.blogService.Update(blogUpdate)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
+	}
+	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Blog update successful", Data: blog})
+
 }
 
 // Delete blog
 func (c *blogHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	_ = config.WriteJSON(w, 200, config.Response{Status: true, Message: "Delete"})
-
-	/*var blog entity.Blog
-	id, err := strconv.ParseUint(context.Param("id"), 0, 0)
+	id := chi.URLParam(r, "id")
+	i, _ := strconv.Atoi(id)
+	var blogDelete dto.BlogDelete
+	blogDelete.ID = uint(i)
+	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
+	blogDelete.UserID = userID
+	err := c.blogService.Delete(blogDelete)
 	if err != nil {
-		response := helper.BuildErrorResponse("Failed tou get id", "No param id were found", helper.EmptyObj{})
-		context.JSON(http.StatusBadRequest, response)
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
 	}
-	blog.ID = id
-	authHeader := context.GetHeader("Authorization")
-	token, errToken := c.jwtService.ValidateToken(authHeader)
-	if errToken != nil {
-		panic(errToken.Error())
-	}
-	claims := token.Claims.(jwt.MapClaims)
-	userID := fmt.Sprintf("%v", claims["user_id"])
-	if c.blogService.IsAllowedToEdit(userID, blog.ID) {
-		c.blogService.Delete(blog)
-		res := helper.BuildResponse(true, "Deleted", helper.EmptyObj{})
-		context.JSON(http.StatusOK, res)
-	} else {
-		response := helper.BuildErrorResponse("You dont have permission", "You are not the owner", helper.EmptyObj{})
-		context.JSON(http.StatusForbidden, response)
-	}*/
+	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Blog delete successful", Data: blogDelete})
 }
