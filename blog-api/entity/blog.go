@@ -15,8 +15,8 @@ type Blog struct {
 	ShortText string         `gorm:"NOT NULL;size:500"`
 	LongText  string         `gorm:"NOT NULL"`
 	User      User           `gorm:"constraint:OnDelete:CASCADE"`
-	Comments  []Comment      `json:"comments"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
+	Comments  []Comment      `gorm:"constraint:OnDelete:CASCADE"`
+	CreatedAt time.Time      `gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }

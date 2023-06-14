@@ -14,7 +14,7 @@ type User struct {
 	Email     string         `gorm:"NOT NULL;size:100;index:users_email,unique"`
 	Password  string         `gorm:"NOT NULL;size:255"`
 	Token     string         `gorm:"NOT NULL;size:255"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
+	CreatedAt time.Time      `gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }

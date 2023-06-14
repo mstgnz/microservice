@@ -14,7 +14,7 @@ type Comment struct {
 	Content   string         `gorm:"NOT NULL"`
 	User      User           `gorm:"constraint:OnDelete:CASCADE"`
 	Blog      Blog           `gorm:"constraint:OnDelete:CASCADE"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
+	CreatedAt time.Time      `gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
