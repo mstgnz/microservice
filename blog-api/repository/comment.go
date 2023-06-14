@@ -7,10 +7,10 @@ import (
 
 // ICommentRepository interface
 type ICommentRepository interface {
-	InsertComment(b entity.Comment) (entity.Comment, error)
-	UpdateComment(b entity.Comment) entity.Comment
-	DeleteComment(b entity.Comment)
-	FindCommentByID(commentID uint) entity.Comment
+	Create(b entity.Comment) (entity.Comment, error)
+	Update(b entity.Comment) (entity.Comment, error)
+	Delete(id uint) error
+	Find(commentID uint) (entity.Comment, error)
 }
 
 // commentRepository struct
@@ -25,29 +25,27 @@ func CommentRepository(dbConn *gorm.DB) ICommentRepository {
 	}
 }
 
-// InsertComment create comment
-func (db *commentRepository) InsertComment(b entity.Comment) (entity.Comment, error) {
-	if err := db.connection.Save(&b).Error; err != nil {
-		return b, err
-	}
-	db.connection.Save(&b)
-	return b, nil
+// Create comment
+func (db *commentRepository) Create(b entity.Comment) (entity.Comment, error) {
+	tx := db.connection.Save(&b)
+	return b, tx.Error
 }
 
-// UpdateComment update comment
-func (db *commentRepository) UpdateComment(b entity.Comment) entity.Comment {
-	db.connection.Save(&b)
-	return b
+// Update comment
+func (db *commentRepository) Update(b entity.Comment) (entity.Comment, error) {
+	tx := db.connection.Save(&b)
+	return b, tx.Error
 }
 
-// DeleteComment delete comment
-func (db *commentRepository) DeleteComment(b entity.Comment) {
-	db.connection.Delete(&b)
+// Delete comment
+func (db *commentRepository) Delete(id uint) error {
+	tx := db.connection.Delete(entity.Comment{}, id)
+	return tx.Error
 }
 
-// FindCommentByID find id blog
-func (db *commentRepository) FindCommentByID(commentID uint) entity.Comment {
+// Find id blog
+func (db *commentRepository) Find(commentID uint) (entity.Comment, error) {
 	var comment entity.Comment
-	db.connection.Find(&comment, commentID)
-	return comment
+	tx := db.connection.Find(&comment, commentID)
+	return comment, tx.Error
 }

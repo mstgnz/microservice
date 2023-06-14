@@ -9,7 +9,7 @@ import (
 
 // ICommentHandler interface
 type ICommentHandler interface {
-	Insert(w http.ResponseWriter, r *http.Request)
+	Create(w http.ResponseWriter, r *http.Request)
 	Update(w http.ResponseWriter, r *http.Request)
 	Delete(w http.ResponseWriter, r *http.Request)
 }
@@ -26,9 +26,9 @@ func CommentHandler(commentService service.ICommentService) ICommentHandler {
 	}
 }
 
-// Insert create comment
-func (c *commentHandler) Insert(w http.ResponseWriter, r *http.Request) {
-	_ = config.WriteJSON(w, 200, config.Response{Status: true, Message: "Insert"})
+// Create comment
+func (c *commentHandler) Create(w http.ResponseWriter, r *http.Request) {
+	_ = config.WriteJSON(w, 200, config.Response{Status: true, Message: "Create"})
 
 	/*var commentCreateDTO dto.CommentCreateDTO
 	errDTO := context.ShouldBind(&commentCreateDTO)
@@ -42,7 +42,7 @@ func (c *commentHandler) Insert(w http.ResponseWriter, r *http.Request) {
 		if err == nil {
 			commentCreateDTO.UserID = convertedUserID
 		}
-		result, err := c.commentService.Insert(commentCreateDTO)
+		result, err := c.commentService.Create(commentCreateDTO)
 		if err != nil {
 			response := helper.BuildErrorResponse("ERROR", err.Error(), err.Error())
 			context.JSON(http.StatusBadRequest, response)

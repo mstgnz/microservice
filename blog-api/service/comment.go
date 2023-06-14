@@ -1,8 +1,7 @@
 package service
 
 import (
-	"fmt"
-	"log"
+	"errors"
 
 	"github.com/mashingan/smapping"
 	"github.com/mstgnz/microservice/dto"
@@ -12,10 +11,9 @@ import (
 
 // ICommentService interface
 type ICommentService interface {
-	Insert(b dto.CommentCreateDTO) (entity.Comment, error)
-	Update(b dto.CommentUpdateDTO) entity.Comment
-	Delete(b entity.Comment)
-	IsAllowedToEdit(userID string, commentID uint) bool
+	Create(b dto.CommentCreate) (dto.Comment, error)
+	Update(b dto.CommentUpdate) (dto.Comment, error)
+	Delete(b dto.CommentDelete) error
 }
 
 // commentService struct
@@ -30,35 +28,62 @@ func CommentService(commentRepo repository.ICommentRepository) ICommentService {
 	}
 }
 
-// Insert comment service
-func (service *commentService) Insert(b dto.CommentCreateDTO) (entity.Comment, error) {
+// Create comment service
+func (service *commentService) Create(b dto.CommentCreate) (dto.Comment, error) {
 	comment := entity.Comment{}
+	commentDto := dto.Comment{}
+	// mapping
 	err := smapping.FillStruct(&comment, smapping.MapFields(&b))
 	if err != nil {
-		log.Fatalf("Failed map %v: ", err)
+		return commentDto, err
 	}
-	return service.commentRepository.InsertComment(comment)
+	// create
+	comment, err = service.commentRepository.Create(comment)
+	if err != nil {
+		return commentDto, err
+	}
+	// mapping
+	err = smapping.FillStruct(&commentDto, smapping.MapFields(&comment))
+	return commentDto, err
 }
 
 // Update comment service
-func (service *commentService) Update(b dto.CommentUpdateDTO) entity.Comment {
+func (service *commentService) Update(b dto.CommentUpdate) (dto.Comment, error) {
 	comment := entity.Comment{}
-	err := smapping.FillStruct(&comment, smapping.MapFields(&b))
+	commentDto := dto.Comment{}
+	// is owner
+	find, err := service.commentRepository.Find(b.ID)
 	if err != nil {
-		log.Fatalf("Failed map %v: ", err)
+		return commentDto, err
 	}
-	res := service.commentRepository.UpdateComment(comment)
-	return res
+	if find.UserID != b.UserID {
+		return commentDto, errors.New("this content does not belong to you")
+	}
+	// mapping
+	err = smapping.FillStruct(&comment, smapping.MapFields(&b))
+	if err != nil {
+		return commentDto, err
+	}
+	// update
+	comment, err = service.commentRepository.Update(comment)
+	if err != nil {
+		return commentDto, err
+	}
+	// mapping
+	err = smapping.FillStruct(&commentDto, smapping.MapFields(&comment))
+	return commentDto, err
 }
 
 // Delete comment service
-func (service *commentService) Delete(b entity.Comment) {
-	service.commentRepository.DeleteComment(b)
-}
-
-// IsAllowedToEdit blog service
-func (service *commentService) IsAllowedToEdit(userID string, commentID uint) bool {
-	b := service.commentRepository.FindCommentByID(commentID)
-	id := fmt.Sprintf("%v", b.UserID)
-	return userID == id
+func (service *commentService) Delete(b dto.CommentDelete) error {
+	// is owner
+	find, err := service.commentRepository.Find(b.ID)
+	if err != nil {
+		return err
+	}
+	if find.UserID != b.UserID {
+		return errors.New("this content does not belong to you")
+	}
+	// delete
+	return service.commentRepository.Delete(b.ID)
 }

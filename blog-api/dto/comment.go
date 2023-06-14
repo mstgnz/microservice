@@ -1,26 +1,28 @@
 package dto
 
-// CommentCreateDTO Comment Create Data Transfer Objects
-type CommentCreateDTO struct {
+type CommentCreate struct {
 	UserID  uint   `json:"user_id"`
-	BlogID  uint   `json:"blog_id"`
-	Content string `json:"content"`
+	BlogID  uint   `json:"blog_id" validate:"required"`
+	Content string `json:"content" validate:"required,min=10"`
 }
 
-// CommentUpdateDTO Comment Update Data Transfer Objects
-type CommentUpdateDTO struct {
+type CommentUpdate struct {
 	ID      uint   `json:"id"`
 	UserID  uint   `json:"user_id"`
-	BlogID  uint   `json:"blog_id"`
-	Content string `json:"content"`
+	Content string `json:"content" validate:"required,min=10"`
 }
 
-// CommentListDTO Comment List Data Transfer Objects
-type CommentListDTO struct {
+type Comment struct {
 	ID        uint   `json:"id"`
 	UserID    uint   `json:"user_id"`
 	BlogID    uint   `json:"blog_id"`
 	Content   string `json:"content"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
+	User      User   `json:"user"`
+}
+
+type CommentDelete struct {
+	ID     uint `json:"id" validate:"required"`
+	UserID uint `json:"user_id"`
 }
