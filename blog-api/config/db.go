@@ -3,7 +3,9 @@ package config
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/mstgnz/microservice/entity"
 	"gorm.io/driver/postgres"
@@ -37,4 +39,26 @@ func CloseDatabase(db *gorm.DB) {
 		panic("Failed to close connection from database")
 	}
 	_ = dbSQL.Close()
+}
+
+// Paginate if need pagination use this scope
+func Paginate(r *http.Request) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		q := r.URL.Query()
+		page, _ := strconv.Atoi(q.Get("page"))
+		if page <= 0 {
+			page = 1
+		}
+
+		pageSize, _ := strconv.Atoi(q.Get("page_size"))
+		switch {
+		case pageSize > 100:
+			pageSize = 100
+		case pageSize <= 0:
+			pageSize = 10
+		}
+
+		offset := (page - 1) * pageSize
+		return db.Offset(offset).Limit(pageSize)
+	}
 }

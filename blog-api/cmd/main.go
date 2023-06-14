@@ -25,9 +25,6 @@ var (
 	commentHandler = handler.CommentHandler(commentService)
 )
 
-type Config struct {
-}
-
 func main() {
 	defer config.CloseDatabase(db)
 
@@ -49,14 +46,14 @@ func main() {
 	r.Route("/api", func(r chi.Router) {
 		r.Route("/blogs", func(r chi.Router) {
 			r.Get("/", blogHandler.All)
-			r.Get("/{id}", blogHandler.FindByID)
-			r.With(customMiddleware.TokenValidate).Post("/", blogHandler.Insert)
+			r.Get("/{slug}", blogHandler.Find)
+			r.With(customMiddleware.TokenValidate).Post("/", blogHandler.Create)
 			r.With(customMiddleware.TokenValidate).Put("/{id}", blogHandler.Update)
 			r.With(customMiddleware.TokenValidate).Delete("/{id}", blogHandler.Delete)
 		})
 		r.Route("/comments", func(r chi.Router) {
 			r.Use(customMiddleware.TokenValidate)
-			r.Post("/", commentHandler.Insert)
+			r.Post("/", commentHandler.Create)
 			r.Put("/{id}", commentHandler.Update)
 			r.Delete("/{id}", commentHandler.Delete)
 		})
