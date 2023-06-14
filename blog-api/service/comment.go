@@ -59,6 +59,9 @@ func (service *commentService) Update(b dto.CommentUpdate) (dto.Comment, error) 
 	if find.UserID != b.UserID {
 		return commentDto, errors.New("this content does not belong to you")
 	}
+	if find.BlogID != b.BlogID {
+		return commentDto, errors.New("this content does not belong to blog")
+	}
 	// mapping
 	err = smapping.FillStruct(&comment, smapping.MapFields(&b))
 	if err != nil {

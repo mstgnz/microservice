@@ -33,7 +33,8 @@ func (db *commentRepository) Create(b entity.Comment) (entity.Comment, error) {
 
 // Update comment
 func (db *commentRepository) Update(b entity.Comment) (entity.Comment, error) {
-	tx := db.connection.Save(&b)
+	// it only updates the filled values
+	tx := db.connection.Model(&b).Updates(&b)
 	return b, tx.Error
 }
 
