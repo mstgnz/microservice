@@ -103,7 +103,6 @@ func (c *blogHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Blog update successful", Data: blog})
-
 }
 
 // Delete blog
