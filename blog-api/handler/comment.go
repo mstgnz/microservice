@@ -2,8 +2,11 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/mstgnz/microservice/config"
+	"github.com/mstgnz/microservice/dto"
 	"github.com/mstgnz/microservice/service"
 )
 
@@ -28,88 +31,71 @@ func CommentHandler(commentService service.ICommentService) ICommentHandler {
 
 // Create comment
 func (c *commentHandler) Create(w http.ResponseWriter, r *http.Request) {
-	_ = config.WriteJSON(w, 200, config.Response{Status: true, Message: "Create"})
+	var commentCreate dto.CommentCreate
+	// body to struct
+	err := config.ReadJSON(w, r, &commentCreate)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
+	}
+	// struct to validate
+	err = config.Validate(commentCreate)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
+	}
+	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
+	commentCreate.UserID = userID
 
-	/*var commentCreateDTO dto.CommentCreateDTO
-	errDTO := context.ShouldBind(&commentCreateDTO)
-	if errDTO != nil {
-		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
-		context.JSON(http.StatusBadRequest, res)
-	} else {
-		authHeader := context.GetHeader("Authorization")
-		userID := c.getUserIDByToken(authHeader)
-		convertedUserID, err := strconv.ParseUint(userID, 10, 64)
-		if err == nil {
-			commentCreateDTO.UserID = convertedUserID
-		}
-		result, err := c.commentService.Create(commentCreateDTO)
-		if err != nil {
-			response := helper.BuildErrorResponse("ERROR", err.Error(), err.Error())
-			context.JSON(http.StatusBadRequest, response)
-		} else {
-			response := helper.BuildResponse(true, "OK", result)
-			context.JSON(http.StatusCreated, response)
-		}
-	}*/
+	comment, err := c.commentService.Create(commentCreate)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
+	}
+	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Comment create successful", Data: comment})
 }
 
 // Update comment
 func (c *commentHandler) Update(w http.ResponseWriter, r *http.Request) {
-	_ = config.WriteJSON(w, 200, config.Response{Status: true, Message: "Update"})
-
-	/*var commentUpdateDTO dto.CommentUpdateDTO
-	errDTO := context.ShouldBind(&commentUpdateDTO)
-	if errDTO != nil {
-		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
-		context.JSON(http.StatusBadRequest, res)
+	var commentUpdate dto.CommentUpdate
+	// body to struct
+	err := config.ReadJSON(w, r, &commentUpdate)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 		return
 	}
-
-	authHeader := context.GetHeader("Authorization")
-	token, errToken := c.jwtService.ValidateToken(authHeader)
-	if errToken != nil {
-		panic(errToken.Error())
+	// struct to validate
+	err = config.Validate(commentUpdate)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
 	}
-	claims := token.Claims.(jwt.MapClaims)
-	userID := fmt.Sprintf("%v", claims["user_id"])
-	if c.commentService.IsAllowedToEdit(userID, commentUpdateDTO.ID) {
-		id, errID := strconv.ParseUint(userID, 10, 64)
-		if errID == nil {
-			commentUpdateDTO.UserID = id
-		}
-		result := c.commentService.Update(commentUpdateDTO)
-		response := helper.BuildResponse(true, "OK", result)
-		context.JSON(http.StatusOK, response)
-	} else {
-		response := helper.BuildErrorResponse("You dont have permission", "You are not the owner", helper.EmptyObj{})
-		context.JSON(http.StatusForbidden, response)
-	}*/
+	id := chi.URLParam(r, "id")
+	i, _ := strconv.Atoi(id)
+	commentUpdate.ID = uint(i)
+	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
+	commentUpdate.UserID = userID
+
+	comment, err := c.commentService.Update(commentUpdate)
+	if err != nil {
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
+	}
+	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Comment update successful", Data: comment})
 }
 
 // Delete comment
 func (c *commentHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	_ = config.WriteJSON(w, 200, config.Response{Status: true, Message: "Delete"})
-
-	/*var comment entity.Comment
-	id, err := strconv.ParseUint(context.Param("id"), 0, 0)
+	id := chi.URLParam(r, "id")
+	i, _ := strconv.Atoi(id)
+	var commentDelete dto.CommentDelete
+	commentDelete.ID = uint(i)
+	userID, _ := config.GetUserIDByToken(r.Header.Get("Authorization"))
+	commentDelete.UserID = userID
+	err := c.commentService.Delete(commentDelete)
 	if err != nil {
-		response := helper.BuildErrorResponse("Failed tou get id", "No param id were found", helper.EmptyObj{})
-		context.JSON(http.StatusBadRequest, response)
+		_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
+		return
 	}
-	comment.ID = id
-	authHeader := context.GetHeader("Authorization")
-	token, errToken := c.jwtService.ValidateToken(authHeader)
-	if errToken != nil {
-		panic(errToken.Error())
-	}
-	claims := token.Claims.(jwt.MapClaims)
-	userID := fmt.Sprintf("%v", claims["user_id"])
-	if c.commentService.IsAllowedToEdit(userID, comment.ID) {
-		c.commentService.Delete(comment)
-		res := helper.BuildResponse(true, "Deleted", helper.EmptyObj{})
-		context.JSON(http.StatusOK, res)
-	} else {
-		response := helper.BuildErrorResponse("You dont have permission", "You are not the owner", helper.EmptyObj{})
-		context.JSON(http.StatusForbidden, response)
-	}*/
+	_ = config.WriteJSON(w, http.StatusOK, config.Response{Status: true, Message: "Comment delete successful", Data: commentDelete})
 }

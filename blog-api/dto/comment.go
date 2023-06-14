@@ -9,6 +9,7 @@ type CommentCreate struct {
 type CommentUpdate struct {
 	ID      uint   `json:"id"`
 	UserID  uint   `json:"user_id"`
+	BlogID  uint   `json:"blog_id" validate:"required"`
 	Content string `json:"content" validate:"required,min=10"`
 }
 
