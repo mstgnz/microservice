@@ -1,5 +1,9 @@
 package dto
 
+import (
+	"time"
+)
+
 type CommentCreate struct {
 	UserID  uint   `json:"user_id"`
 	BlogID  uint   `json:"blog_id" validate:"required"`
@@ -14,13 +18,13 @@ type CommentUpdate struct {
 }
 
 type Comment struct {
-	ID        uint   `json:"id"`
-	UserID    uint   `json:"user_id"`
-	BlogID    uint   `json:"blog_id"`
-	Content   string `json:"content"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-	User      User   `json:"user"`
+	ID        uint      `json:"id"`
+	UserID    uint      `json:"user_id"`
+	BlogID    uint      `json:"blog_id"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	User      User      `json:"user,omitempty"`
 }
 
 type CommentDelete struct {

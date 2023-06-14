@@ -29,7 +29,7 @@ type BlogList struct {
 	LongText  string    `json:"long_text"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	User      User      `json:"user"`
+	User      User      `json:"user,omitempty"`
 }
 
 type Blog struct {
@@ -41,8 +41,8 @@ type Blog struct {
 	LongText  string    `json:"long_text"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	User      User      `json:"user"`
-	Comments  []Comment `json:"comments"`
+	User      User      `json:"user,omitempty"`
+	Comments  []Comment `json:"comments,omitempty"`
 }
 
 type BlogDelete struct {
