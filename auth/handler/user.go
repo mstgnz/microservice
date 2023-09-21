@@ -8,8 +8,8 @@ import (
 	"github.com/mstgnz/microservice/service"
 )
 
-// IUserHandler interface
-type IUserHandler interface {
+// UserHandler interface
+type UserHandler interface {
 	Update(w http.ResponseWriter, r *http.Request)
 	Profile(w http.ResponseWriter, r *http.Request)
 	UpdatePassword(w http.ResponseWriter, r *http.Request)
@@ -17,11 +17,11 @@ type IUserHandler interface {
 
 // userHandler struct
 type userHandler struct {
-	userService service.IUserService
+	userService service.UserService
 }
 
-// UserHandler instance
-func UserHandler(userService service.IUserService) IUserHandler {
+// NewUserHandler instance
+func NewUserHandler(userService service.UserService) UserHandler {
 	return &userHandler{
 		userService: userService,
 	}

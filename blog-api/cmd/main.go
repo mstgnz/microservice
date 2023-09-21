@@ -16,13 +16,13 @@ import (
 
 var (
 	db                = config.OpenDatabase()
-	blogRepository    = repository.BlogRepository(db)
-	commentRepository = repository.CommentRepository(db)
-	blogService       = service.BlogService(blogRepository)
-	commentService    = service.CommentService(commentRepository)
+	blogRepository    = repository.NewBlogRepository(db)
+	commentRepository = repository.NewCommentRepository(db)
+	blogService       = service.NewBlogService(blogRepository)
+	commentService    = service.NewCommentService(commentRepository)
 
-	blogHandler    = handler.BlogHandler(blogService)
-	commentHandler = handler.CommentHandler(commentService)
+	blogHandler    = handler.NewBlogHandler(blogService)
+	commentHandler = handler.NewCommentHandler(commentService)
 )
 
 func main() {

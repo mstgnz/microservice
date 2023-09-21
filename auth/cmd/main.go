@@ -16,11 +16,11 @@ import (
 
 var (
 	db             = config.OpenDatabase()
-	userRepository = repository.UserRepository(db)
-	userService    = service.UserService(userRepository)
-	authService    = service.AuthService(userRepository)
-	authHandler    = handler.AuthHandler(authService)
-	userHandler    = handler.UserHandler(userService)
+	userRepository = repository.NewUserRepository(db)
+	userService    = service.NewUserService(userRepository)
+	authService    = service.NewAuthService(userRepository)
+	authHandler    = handler.NewAuthHandler(authService)
+	userHandler    = handler.NewUserHandler(userService)
 )
 
 func main() {

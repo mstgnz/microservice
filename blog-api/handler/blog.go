@@ -10,8 +10,8 @@ import (
 	"github.com/mstgnz/microservice/service"
 )
 
-// IBlogHandler interface
-type IBlogHandler interface {
+// BlogHandler interface
+type BlogHandler interface {
 	All(w http.ResponseWriter, r *http.Request)
 	Find(w http.ResponseWriter, r *http.Request)
 	Create(w http.ResponseWriter, r *http.Request)
@@ -21,11 +21,11 @@ type IBlogHandler interface {
 
 // blogHandler struct
 type blogHandler struct {
-	blogService service.IBlogService
+	blogService service.BlogService
 }
 
-// BlogHandler instance
-func BlogHandler(blogService service.IBlogService) IBlogHandler {
+// NewBlogHandler instance
+func NewBlogHandler(blogService service.BlogService) BlogHandler {
 	return &blogHandler{
 		blogService: blogService,
 	}

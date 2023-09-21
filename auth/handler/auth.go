@@ -8,16 +8,16 @@ import (
 	"github.com/mstgnz/microservice/service"
 )
 
-type IAuthHandler interface {
+type AuthHandler interface {
 	Login(w http.ResponseWriter, r *http.Request)
 	Register(w http.ResponseWriter, r *http.Request)
 }
 
 type authHandler struct {
-	authService service.IAuthService
+	authService service.AuthService
 }
 
-func AuthHandler(authService service.IAuthService) IAuthHandler {
+func NewAuthHandler(authService service.AuthService) AuthHandler {
 	return &authHandler{
 		authService: authService,
 	}

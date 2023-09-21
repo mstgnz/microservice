@@ -9,8 +9,8 @@ import (
 	"github.com/mstgnz/microservice/repository"
 )
 
-// ICommentService interface
-type ICommentService interface {
+// CommentService interface
+type CommentService interface {
 	Create(b dto.CommentCreate) (dto.Comment, error)
 	Update(b dto.CommentUpdate) (dto.Comment, error)
 	Delete(b dto.CommentDelete) error
@@ -18,11 +18,11 @@ type ICommentService interface {
 
 // commentService struct
 type commentService struct {
-	commentRepository repository.ICommentRepository
+	commentRepository repository.CommentRepository
 }
 
-// CommentService instance
-func CommentService(commentRepo repository.ICommentRepository) ICommentService {
+// NewCommentService instance
+func NewCommentService(commentRepo repository.CommentRepository) CommentService {
 	return &commentService{
 		commentRepository: commentRepo,
 	}

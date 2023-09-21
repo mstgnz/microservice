@@ -5,8 +5,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// ICommentRepository interface
-type ICommentRepository interface {
+// CommentRepository interface
+type CommentRepository interface {
 	Create(b entity.Comment) (entity.Comment, error)
 	Update(b entity.Comment) (entity.Comment, error)
 	Delete(id uint) error
@@ -18,8 +18,8 @@ type commentRepository struct {
 	connection *gorm.DB
 }
 
-// CommentRepository instance
-func CommentRepository(dbConn *gorm.DB) ICommentRepository {
+// NewCommentRepository instance
+func NewCommentRepository(dbConn *gorm.DB) CommentRepository {
 	return &commentRepository{
 		connection: dbConn,
 	}

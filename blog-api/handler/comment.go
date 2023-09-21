@@ -10,8 +10,8 @@ import (
 	"github.com/mstgnz/microservice/service"
 )
 
-// ICommentHandler interface
-type ICommentHandler interface {
+// CommentHandler interface
+type CommentHandler interface {
 	Create(w http.ResponseWriter, r *http.Request)
 	Update(w http.ResponseWriter, r *http.Request)
 	Delete(w http.ResponseWriter, r *http.Request)
@@ -19,11 +19,11 @@ type ICommentHandler interface {
 
 // commentHandler struct
 type commentHandler struct {
-	commentService service.ICommentService
+	commentService service.CommentService
 }
 
-// CommentHandler instance
-func CommentHandler(commentService service.ICommentService) ICommentHandler {
+// NewCommentHandler instance
+func NewCommentHandler(commentService service.CommentService) CommentHandler {
 	return &commentHandler{
 		commentService: commentService,
 	}

@@ -9,8 +9,8 @@ import (
 	"github.com/mstgnz/microservice/repository"
 )
 
-// IBlogService interface
-type IBlogService interface {
+// BlogService interface
+type BlogService interface {
 	All() ([]dto.BlogList, error)
 	Create(b dto.BlogCreate) (dto.BlogList, error)
 	Update(b dto.BlogUpdate) (dto.BlogList, error)
@@ -20,11 +20,11 @@ type IBlogService interface {
 
 // blogService struct
 type blogService struct {
-	blogRepository repository.IBlogRepository
+	blogRepository repository.BlogRepository
 }
 
-// BlogService instance
-func BlogService(blogRepo repository.IBlogRepository) IBlogService {
+// NewBlogService instance
+func NewBlogService(blogRepo repository.BlogRepository) BlogService {
 	return &blogService{
 		blogRepository: blogRepo,
 	}

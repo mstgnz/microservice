@@ -9,8 +9,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// IBlogRepository interface
-type IBlogRepository interface {
+// BlogRepository interface
+type BlogRepository interface {
 	All() ([]entity.Blog, error)
 	Delete(id uint) error
 	Create(b entity.Blog) (entity.Blog, error)
@@ -25,8 +25,8 @@ type blogRepository struct {
 	connection *gorm.DB
 }
 
-// BlogRepository instance
-func BlogRepository(dbConn *gorm.DB) IBlogRepository {
+// NewBlogRepository instance
+func NewBlogRepository(dbConn *gorm.DB) BlogRepository {
 	return &blogRepository{
 		connection: dbConn,
 	}

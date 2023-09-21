@@ -10,17 +10,17 @@ import (
 	"github.com/mstgnz/microservice/repository"
 )
 
-type IAuthService interface {
+type AuthService interface {
 	VerifyCredential(email string, password string) (entity.User, error)
 	CreateUser(user dto.RegisterDTO) (entity.User, error)
 	FindByEmail(email string) bool
 }
 
 type authService struct {
-	userRepository repository.IUserRepository
+	userRepository repository.UserRepository
 }
 
-func AuthService(userRep repository.IUserRepository) IAuthService {
+func NewAuthService(userRep repository.UserRepository) AuthService {
 	return &authService{
 		userRepository: userRep,
 	}

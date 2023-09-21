@@ -10,8 +10,8 @@ import (
 	"github.com/mstgnz/microservice/repository"
 )
 
-// IUserService interface
-type IUserService interface {
+// UserService interface
+type UserService interface {
 	Update(user dto.UserUpdateDTO) (entity.User, error)
 	Profile(userID uint) (entity.User, error)
 	UpdatePassword(pass dto.PassUpdateDTO) error
@@ -19,11 +19,11 @@ type IUserService interface {
 
 // userService struct
 type userService struct {
-	userRepository repository.IUserRepository
+	userRepository repository.UserRepository
 }
 
-// UserService user
-func UserService(userRepo repository.IUserRepository) IUserService {
+// NewUserService user
+func NewUserService(userRepo repository.UserRepository) UserService {
 	return &userService{
 		userRepository: userRepo,
 	}

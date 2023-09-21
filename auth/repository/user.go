@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type IUserRepository interface {
+type UserRepository interface {
 	InsertUser(user entity.User) (entity.User, error)
 	UpdateUser(user entity.User) (entity.User, error)
 	FindByEmail(email string) (entity.User, error)
@@ -18,7 +18,7 @@ type userRepository struct {
 	conn *gorm.DB
 }
 
-func UserRepository(db *gorm.DB) IUserRepository {
+func NewUserRepository(db *gorm.DB) UserRepository {
 	return &userRepository{
 		conn: db,
 	}
