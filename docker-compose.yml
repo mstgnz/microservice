@@ -171,6 +171,27 @@ services:
     networks:
       - microservices
 
+  consul:
+    image: consul:1.15.4
+    container_name: "badger"
+    command: agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    networks:
+      - microservices
+
+  consul-register:
+    build:
+      context: consul-register
+      dockerfile: dockerfile
+    container_name: ${PROJECT_NAME}-consul-register
+    restart: always
+    depends_on:
+      - consul
+    networks:
+      - microservices
+
 networks:
   microservices:
     driver: bridge
