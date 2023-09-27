@@ -74,19 +74,6 @@ services:
     networks:
       - microservices
 
-  logger:
-    build:
-      context: logger
-      dockerfile: dockerfile
-    container_name: ${PROJECT_NAME}-logger
-    restart: always
-    #ports:
-    #  - "8083:80"
-    depends_on:
-      - mongo
-    networks:
-      - microservices
-
   mail:
     build:
       context: mail
@@ -110,6 +97,19 @@ services:
     restart: always
     depends_on:
       - kafka
+    networks:
+      - microservices
+
+  logger:
+    build:
+      context: logger
+      dockerfile: dockerfile
+    container_name: ${PROJECT_NAME}-logger
+    restart: always
+    #ports:
+    #  - "8083:80"
+    depends_on:
+      - mongo
     networks:
       - microservices
 

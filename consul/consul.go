@@ -11,12 +11,13 @@ import (
 )
 
 const (
-	ttl     = time.Second * 8
+	ttl     = time.Second * 10
 	checkId = "check_health"
 )
 
 type Service struct {
 	consulClient *api.Client
+	services     []api.AgentServiceRegistration
 }
 
 func NewService() *Service {
@@ -29,23 +30,14 @@ func NewService() *Service {
 	}
 }
 
-func (s *Service) Start() {
-	ln, err := net.Listen("tcp", ":3000")
-	if err != nil {
-		log.Fatal(err)
-	}
-	s.registerService()
-	go s.healthCheck()
-	s.acceptLoop(ln)
+func (s *Service) AddService(service api.AgentServiceRegistration) {
+	s.services = append(s.services, service)
 }
 
-func (s *Service) acceptLoop(ln net.Listener) {
-	for {
-		_, err := ln.Accept()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+func (s *Service) Start() {
+	s.registerServices()
+	go s.healthCheck()
+	s.acceptLoop()
 }
 
 func (s *Service) healthCheck() {
@@ -59,28 +51,32 @@ func (s *Service) healthCheck() {
 	}
 }
 
-func (s *Service) registerService() {
+func (s *Service) registerServices() {
+
 	check := &api.AgentServiceCheck{
 		DeregisterCriticalServiceAfter: ttl.String(),
 		TLSSkipVerify:                  true,
 		TTL:                            ttl.String(),
 		CheckID:                        checkId,
 	}
+	for _, service := range s.services {
 
-	register := &api.AgentServiceRegistration{
-		ID:      "login_service",
-		Name:    "Login Service",
-		Tags:    []string{"login"},
-		Address: "127.0.0.1",
-		Port:    3000,
-		Check:   check,
-	}
+		service.Check = check
 
-	query := map[string]any{
-		"type":        "service",
-		"service":     "Login Service",
-		"passingonly": true,
+		s.query(map[string]any{
+			"type":        "service",
+			"service":     service.Name,
+			"passingonly": true,
+		})
+
+		if err := s.consulClient.Agent().ServiceRegister(&service); err != nil {
+			log.Fatal(err)
+		}
 	}
+}
+
+func (s *Service) query(query map[string]any) {
+
 	plan, err := watch.Parse(query)
 	if err != nil {
 		log.Fatal(err)
@@ -90,7 +86,7 @@ func (s *Service) registerService() {
 		switch msg := result.(type) {
 		case []*api.ServiceEntry:
 			for _, entry := range msg {
-				fmt.Print("new service", entry.Service)
+				fmt.Print("service", entry.Service)
 			}
 		}
 	}
@@ -98,9 +94,17 @@ func (s *Service) registerService() {
 	go func() {
 		_ = plan.RunWithConfig("", &api.Config{})
 	}()
+}
 
-	if err = s.consulClient.Agent().ServiceRegister(register); err != nil {
+func (s *Service) acceptLoop() {
+	ln, err := net.Listen("tcp", ":3333")
+	if err != nil {
 		log.Fatal(err)
 	}
-
+	for {
+		_, err = ln.Accept()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
