@@ -10,7 +10,7 @@ Microservices are a software architectural style that structures an application 
 This project leverages Docker Compose to orchestrate a set of interconnected microservices, databases, and messaging systems, simulating a microservices architecture environment. Here's a breakdown of the key components:
 
 ### Key technologies and tools used in this project:
-* PostgreSQL: Serves as the primary database for storing application data.
+* PostgresSQL: Serves as the primary database for storing application data.
 * MongoDB: Provides flexibility for unstructured data storage.
 * Redis: Used for caching and enhancing performance.
 * Apache Kafka: Implements a message queue and event-driven architecture.
