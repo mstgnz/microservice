@@ -65,7 +65,7 @@ func (c *authHandler) Register(w http.ResponseWriter, r *http.Request) {
 		_ = config.WriteJSON(w, http.StatusBadRequest, config.Response{Status: false, Message: "Failed to process request", Error: err.Error()})
 		return
 	}
-	if !c.authService.FindByEmail(registerDTO.Email) {
+	if c.authService.FindByEmail(registerDTO.Email) {
 		_ = config.WriteJSON(w, http.StatusConflict, config.Response{Status: false, Message: "Email already exists"})
 		return
 	} else {
