@@ -183,7 +183,7 @@ services:
 
   consul-register:
     build:
-      context: consul-register
+      context: consul
       dockerfile: dockerfile
     container_name: ${PROJECT_NAME}-consul-register
     restart: always
