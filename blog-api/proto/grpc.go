@@ -9,7 +9,7 @@ import (
 )
 
 func WriteGRPCLog(name, data string) (*LogResponse, error) {
-	dial, err := grpc.Dial("logger-service:50001", grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
+	dial, err := grpc.Dial("microservice-logger:50001", grpc.WithTransportCredentials(insecure.NewCredentials()), grpc.WithBlock())
 	if err != nil {
 		return nil, err
 	}
