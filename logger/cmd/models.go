@@ -62,7 +62,9 @@ func (l *LogEntry) All() ([]*LogEntry, error) {
 		log.Println("Finding all docs error:", err)
 		return nil, err
 	}
-	defer cursor.Close(ctx)
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		_ = cursor.Close(ctx)
+	}(cursor, ctx)
 
 	var logs []*LogEntry
 

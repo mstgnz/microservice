@@ -1,53 +1,52 @@
 package main
 
-/*import (
+import (
 	"context"
 	"fmt"
 	"log"
 	"net"
 
-	"google.golang.org/grpc"
 	"github.com/mstgnz/microservice/proto"
+	"google.golang.org/grpc"
 )
 
 type LogServer struct {
 	proto.UnimplementedLogServiceServer
-	Models data.Models
+	Models Models
 }
 
-func (l *LogServer) WriteLog(ctx context.Context, req *logs.LogRequest) (*logs.LogResponse, error) {
-	input := req.GetLogEntry()
+func (l *LogServer) WriteLog(ctx context.Context, req *proto.LogRequest) (*proto.LogResponse, error) {
 
 	// write the log
-	logEntry := data.LogEntry{
-		Name: input.Name,
-		Data: input.Data,
+	logEntry := LogEntry{
+		Name: req.GetName(),
+		Data: req.GetData(),
 	}
 
 	err := l.Models.LogEntry.Insert(logEntry)
 	if err != nil {
-		res := &logs.LogResponse{Result: "failed"}
+		res := &proto.LogResponse{Result: false}
 		return res, err
 	}
 
 	// return response
-	res := &logs.LogResponse{Result: "logged!"}
+	res := &proto.LogResponse{Result: true}
 	return res, nil
 }
 
 func (app *Config) gRPCListen() {
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", gRpcPort))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", 50001))
 	if err != nil {
 		log.Fatalf("Failed to listen for gRPC: %v", err)
 	}
 
 	s := grpc.NewServer()
 
-	logs.RegisterLogServiceServer(s, &LogServer{Models: app.Models})
+	proto.RegisterLogServiceServer(s, &LogServer{Models: app.Models})
 
-	log.Printf("gRPC Server started on port %s", gRpcPort)
+	log.Printf("gRPC Server started on port %v", 50001)
 
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("Failed to listen for gRPC: %v", err)
 	}
-}*/
+}
