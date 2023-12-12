@@ -18,7 +18,8 @@ func Validate(structure interface{}) error {
 		// this check is only needed when your code could produce
 		// an invalid value for validation such as interface with nil
 		// value most including myself do not usually have code like this.
-		if _, ok := err.(*validator.InvalidValidationError); ok {
+		var invalidValidationError *validator.InvalidValidationError
+		if errors.As(err, &invalidValidationError) {
 			errStr = err.Error()
 		}
 		for _, err := range err.(validator.ValidationErrors) {
