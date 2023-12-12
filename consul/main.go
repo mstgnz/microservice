@@ -74,6 +74,14 @@ func main() {
 	})
 
 	s.AddService(api.AgentServiceRegistration{
+		ID:      "auth",
+		Name:    "Auth",
+		Tags:    []string{"service", "backend"},
+		Address: "microservice-auth",
+		Port:    80,
+	})
+
+	s.AddService(api.AgentServiceRegistration{
 		ID:      "blog-api",
 		Name:    "Blog Api",
 		Tags:    []string{"service", "backend"},
